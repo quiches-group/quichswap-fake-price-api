@@ -93,9 +93,12 @@ export class AppService {
     }));
   };
 
-  getPrice = async (symbol: string, timestamp?: number): Promise<number> => {
-    const price = await this.getLastTokenPrice(symbol, timestamp);
+  getPrice = async (
+    symbol: string,
+    timestamp?: number,
+  ): Promise<{ price: number }> => {
+    const { price } = await this.getLastTokenPrice(symbol, timestamp);
 
-    return price.price;
+    return { price };
   };
 }
