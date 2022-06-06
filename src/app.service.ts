@@ -57,8 +57,22 @@ export class AppService {
     return newTokenPrice;
   };
 
-  getLastTokenPrice = (symbol: string): Promise<TokenPrice> =>
-    this.tokenPriceModel.findOne({ symbol }).sort({ timestamp: -1 }).exec();
+  getLastTokenPrice = (
+    symbol: string,
+    timestamp?: number,
+  ): Promise<TokenPrice> => {
+    if (!timestamp) {
+      return this.tokenPriceModel
+        .findOne({ symbol })
+        .sort({ timestamp: -1 })
+        .exec();
+    }
+
+    return this.tokenPriceModel
+      .findOne({ symbol, timestamp: { $lte: timestamp } })
+      .sort({ timestamp: -1 })
+      .exec();
+  };
 
   getPriceHistory = async (
     symbol: string,
@@ -71,9 +85,9 @@ export class AppService {
     }));
   };
 
-  getPrice = async (symbol: string): Promise<number> => {
-    const prices = await this.tokenPriceModel.find({ symbol }).exec();
+  getPrice = async (symbol: string, timestamp?: number): Promise<number> => {
+    const price = await this.getLastTokenPrice(symbol, timestamp);
 
-    return prices[prices.length - 1].price;
+    return price.price;
   };
 }
