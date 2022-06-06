@@ -46,13 +46,13 @@ export class AppService {
     newTokenPrice.symbol = oldTokenPrice.symbol;
     newTokenPrice.timestamp = this.currentTimestamp();
 
-    const minRange = 0.9965;
+    const minRange = 0.9955;
     const maxRange = 1.005;
     const newPriceFactor = Math.random() * (maxRange - minRange) + minRange;
     const newPrice = Math.max(oldTokenPrice.price * newPriceFactor, 0);
     newTokenPrice.price = Number(newPrice.toFixed(3));
 
-    console.log(`old: ${oldTokenPrice.price} | new: ${newTokenPrice.price}`);
+    // console.log(`old: ${oldTokenPrice.price} | new: ${newTokenPrice.price}`);
 
     return newTokenPrice;
   };
