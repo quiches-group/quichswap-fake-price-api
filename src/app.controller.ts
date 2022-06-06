@@ -1,7 +1,9 @@
 import { Controller, Get, NotFoundException, Query } from '@nestjs/common';
 import { AppService } from './app.service';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @Controller('price')
+@ApiTags('Price')
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
@@ -15,6 +17,7 @@ export class AppController {
   }
 
   @Get('')
+  @ApiQuery({ name: 'timestamp', required: false })
   getPrice(
     @Query('symbol') symbol: string,
     @Query('timestamp') timestamp?: number,

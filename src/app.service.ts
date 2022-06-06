@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import * as moment from 'moment';
 import { TokenPrice, TokenPriceDocument } from './token-price.entity';
@@ -61,6 +61,10 @@ export class AppService {
     symbol: string,
     timestamp?: number,
   ): Promise<TokenPrice> => {
+    if (!this.tokenSymbols.includes(symbol)) {
+      throw new NotFoundException('Symbol not found');
+    }
+
     if (!timestamp) {
       return this.tokenPriceModel
         .findOne({ symbol })
@@ -77,6 +81,10 @@ export class AppService {
   getPriceHistory = async (
     symbol: string,
   ): Promise<{ timestamp: number; price: number }[]> => {
+    if (!this.tokenSymbols.includes(symbol)) {
+      throw new NotFoundException('Symbol not found');
+    }
+
     const prices = await this.tokenPriceModel.find({ symbol }).exec();
 
     return prices.map((price) => ({
