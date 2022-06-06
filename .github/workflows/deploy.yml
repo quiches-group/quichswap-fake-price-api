@@ -2,7 +2,7 @@ name: SSH
 on:
   push:
     branches:
-      - develop
+      - main
   workflow_dispatch:
 
 jobs:

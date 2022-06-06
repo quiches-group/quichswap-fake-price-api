@@ -19,9 +19,7 @@ export class AppService {
   @Cron('*/10 * * * * *')
   updateAllTokenPrices() {
     this.tokenSymbols
-      .map(async (token) =>
-        this.tokenPriceModel.findOne({ symbol: token }).sort({ timestamp: -1 }),
-      )
+      .map((symbol) => this.getLastTokenPrice(symbol))
       .map((price) => this.getNewPrice(price))
       .forEach(async (price) => {
         const newTokenPrice = await price;
@@ -48,8 +46,8 @@ export class AppService {
     newTokenPrice.symbol = oldTokenPrice.symbol;
     newTokenPrice.timestamp = this.currentTimestamp();
 
-    const minRange = 0.98;
-    const maxRange = 1.035;
+    const minRange = 0.9965;
+    const maxRange = 1.005;
     const newPriceFactor = Math.random() * (maxRange - minRange) + minRange;
     const newPrice = Math.max(oldTokenPrice.price * newPriceFactor, 0);
     newTokenPrice.price = Number(newPrice.toFixed(3));
@@ -58,6 +56,9 @@ export class AppService {
 
     return newTokenPrice;
   };
+
+  getLastTokenPrice = (symbol: string): Promise<TokenPrice> =>
+    this.tokenPriceModel.findOne({ symbol }).sort({ timestamp: -1 }).exec();
 
   getPriceHistory = async (
     symbol: string,
