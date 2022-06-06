@@ -1,0 +1,31 @@
+name: SSH
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Deploy on VPS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: burnett01/rsync-deployments@4.0
+        with:
+          switches: -avzr --delete --exclude=.env
+          path: ./
+          remote_path: /root/quichswap-price-faker/
+          remote_host: ${{ secrets.HOST }}
+          remote_port: ${{ secrets.PORT }}
+          remote_user: ${{ secrets.USERNAME }}
+          remote_key: ${{ secrets.SSH_KEY }}
+      - uses: appleboy/ssh-action@v0.0.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd ./quichswap-price-faker;
+            docker-compose -f docker-compose.yml up --build --force-recreate --detach;
