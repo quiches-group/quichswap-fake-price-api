@@ -1,0 +1,25 @@
+version: '3.1'
+
+services:
+  nodejs:
+    container_name: quicheswap-price-faker
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      - reverse-proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.QUICHSWAP_PRICE_FAKER.rule=Host(`api.swap.quiches.ovh`)
+      - traefik.http.routers.QUICHSWAP_PRICE_FAKER.entrypoints=http
+      - traefik.http.routers.QUICHSWAP_PRICE_FAKER.middlewares=https-redirect@file
+      - traefik.http.routers.QUICHSWAP_PRICE_FAKER-Https.rule=Host(`api.swap.quiches.ovh`)
+      - traefik.http.routers.QUICHSWAP_PRICE_FAKER-Https.entrypoints=https
+      - traefik.http.routers.QUICHSWAP_PRICE_FAKER-Https.middlewares=security@file, compression@file
+      - traefik.http.routers.QUICHSWAP_PRICE_FAKER-Https.tls=true
+      - traefik.http.routers.QUICHSWAP_PRICE_FAKER-Https.tls.certresolver=letsencrypt
+
+networks:
+  reverse-proxy:
+    external: true
