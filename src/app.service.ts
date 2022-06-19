@@ -101,4 +101,64 @@ export class AppService {
 
     return { price };
   };
+
+  getPriceGraph = async (
+    symbol: string,
+    start_date?: number,
+    end_date?: number,
+  ) => {
+    const timeDiff = end_date - start_date;
+    const graphType = timeDiff > 86400 ? 'day' : 'hour';
+
+    const returnData = this.getBaseGraphObject(graphType, start_date, end_date);
+
+    const data = await this.tokenPriceModel
+      .find({
+        symbol,
+        timestamp: {
+          $gte: start_date,
+          $lte: end_date,
+        },
+      })
+      .sort({ timestamp: -1 })
+      .exec();
+
+    data.forEach((price) => {
+      const graphDateString = this.getGraphDateString(
+        graphType,
+        price.timestamp,
+      );
+
+      returnData[graphDateString] = Math.max(price.price, 0);
+    });
+
+    return Object.keys(returnData).map((key) => [key, returnData[key]]);
+  };
+
+  private getBaseGraphObject = (
+    graph_type: 'day' | 'hour',
+    start_date: number,
+    end_date: number,
+  ) => {
+    const returnData = {};
+    const workDate = moment.unix(start_date);
+
+    while (workDate.unix() <= end_date) {
+      returnData[this.getGraphDateString(graph_type, workDate.unix())] = 0;
+      workDate.add(1, graph_type);
+    }
+
+    return returnData;
+  };
+
+  private getGraphDateString = (
+    graph_type: 'day' | 'hour',
+    timestamp: number,
+  ) => {
+    if (graph_type === 'day') {
+      return moment.unix(timestamp).format('YYYY-MM-DD');
+    }
+
+    return moment.unix(timestamp).format('YYYY-MM-DD HH:00:00');
+  };
 }
