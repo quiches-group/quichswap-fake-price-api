@@ -6,6 +6,10 @@ import config from './config';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  if (config.mode === 'DEV') {
+    app.enableCors();
+  }
+
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Quichswap fake price API')
     .setDescription('')
